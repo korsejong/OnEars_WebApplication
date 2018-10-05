@@ -3,6 +3,10 @@ import datetime
 from boto3 import client as boto3_client
 lambda_client = boto3_client('lambda', region_name='ap-northeast-2')
 
+import os
+import boto3
+from boto3.dynamodb.conditions import Key, Attr
+
 class AudioController(object):
     def __init__(self):
         self.payload = {
@@ -104,20 +108,45 @@ def lambda_handler(event, context):
     # check user message
     state['depth'] += 1
     if state['depth'] == 1:
-        state['depth'] = 1
+        state = {
+            'depth': 1,
+            'title': None,
+            'mainCategory': 'news',
+            'subCategory': None,
+            'url': None,
+        }
     elif state['depth'] == 2:
         if userMessage['data'] in subCategories:
             state['subCategory'] = userMessage['data']
         else:
-            state['depth'] = 1
+            state = {
+                'depth': 1,
+                'title': None,
+                'mainCategory': 'news',
+                'subCategory': None,
+                'url': None,
+            }
     elif state['depth'] == 3:
         if userMessage['data'] in expectedAnswerList['confirm']:
             state['depth'] = 3
         elif userMessage['data'] in expectedAnswerList['next']:
             state['depth'] = 2
         elif userMessage['data'] in expectedAnswerList['cancel']:
-            state['depth'] = 1
+            state = {
+                'depth': 1,
+                'title': None,
+                'mainCategory': 'news',
+                'subCategory': None,
+                'url': None,
+            }
         else:
+            state = {
+                'depth': 1,
+                'title': None,
+                'mainCategory': 'news',
+                'subCategory': None,
+                'url': None,
+            }
             print('err')
             # 못알아들음
     
@@ -145,8 +174,25 @@ def lambda_handler(event, context):
             # response['message']['audioUrl'],audioId = audioController.convertToSingleAudio(newsList['title'])
             
             response['message']['data'] = resMessage
-            response['message']['audioUrl'],audioId = audioController.convertToSingleAudio(resMessage)
-            
+            if 'audioUrl' in newsList:
+                if newsList['audioUrl'] == 'empty':
+                    response['message']['audioUrl'],audioId = audioController.convertToSingleAudio(resMessage)
+                    dynamodb = boto3.resource('dynamodb')
+                    table = dynamodb.Table(os.environ['DB_TABLE_NAME'])
+                    table.update_item(
+                        Key={
+                            'category': newsList['category'],
+                            'createdAt': newsList['createdAt']
+                        },
+                        UpdateExpression='SET audioUrl = :val',
+                        ExpressionAttributeValues={
+                            ':val': response['message']['audioUrl']
+                        }
+                    )
+                else:
+                    response['message']['audioUrl'] = newsList['audioUrl']
+            else:
+                response['message']['audioUrl'],audioId = audioController.convertToSingleAudio(resMessage)
             state['title'] = newsList['title']
             state['url'] = newsList['url']
         else:

@@ -66,7 +66,8 @@ def lambda_handler(event, context):
                     'title': news['title'],
                     'url': news['url'],
                     'date': news['date'],
-                    'company' : news['company']
+                    'company' : news['company'],
+                    'audioUrl' : 'empty'
                 })
         else:
             for news in newslist:
@@ -78,7 +79,8 @@ def lambda_handler(event, context):
                     'title': news['title'],
                     'url': news['url'],
                     'date': news['date'],
-                    'company' : news['company']
+                    'company' : news['company'],
+                    'audioUrl' : 'empty'
                 })
                     
     if event['url'] is '' or event['url'] is None:
