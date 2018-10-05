@@ -1,0 +1,121 @@
+{
+    
+    "BBC_world":{
+        "world":"http://feeds.bbci.co.uk/news/world/rss.xml"
+    },
+    "Reuters_world":{
+        "world":"http://feeds.reuters.com/Reuters/worldNews"
+    },
+    "ABC_world":{
+        "world":"https://abcnews.go.com/abcnews/internationalheadlines"
+    },
+    "NewYorkTimes_world":{
+        "world":"http://rss.nytimes.com/services/xml/rss/nyt/World.xml"
+    },
+    "CNN_world":{
+        "world":"http://rss.cnn.com/rss/edition_world.rss"  
+    },
+    
+    
+    "BBC_money":{
+        "money":"http://feeds.bbci.co.uk/news/business/rss.xml"
+    },
+    "Reuters_money":{
+        "money":"http://feeds.reuters.com/news/wealth"
+    },
+    "ABC_money":{
+        "money":"https://abcnews.go.com/abcnews/moneyheadlines"
+    },
+    "NewYorkTimes_money":{
+        "money":"http://rss.nytimes.com/services/xml/rss/nyt/Economy.xml"
+    },
+    "CNN_money":{
+        "money":"http://rss.cnn.com/rss/money_news_international.rss"  
+    },
+    
+    
+    "BBC_tech":{
+        "tech":"http://feeds.bbci.co.uk/news/technology/rss.xml"
+    },
+    "Reuters_tech":{
+        "tech":"http://feeds.reuters.com/reuters/technologyNews"
+    },
+    "ABC_tech":{
+        "tech":"https://abcnews.go.com/abcnews/technologyheadlines"
+    },
+    "NewYorkTimes_tech":{
+        "tech":"http://rss.nytimes.com/services/xml/rss/nyt/Technology.xml"
+    },
+    "CNN_tech":{
+        "tech":"http://rss.cnn.com/rss/edition_technology.rss"  
+    },
+    
+    
+    "BBC_politics":{
+        "politics":"http://feeds.bbci.co.uk/news/politics/rss.xml"
+    },
+    "Reuters_politics":{
+        "politics":"http://feeds.reuters.com/Reuters/PoliticsNews"
+    },
+    "ABC_politics":{
+        "politics":"https://abcnews.go.com/abcnews/politicsheadlines"
+    },
+    "NewYorkTimes_politics":{
+        "politics":"http://rss.nytimes.com/services/xml/rss/nyt/Politics.xml"
+    },
+    "CNN_politics":{
+        "politics":"http://rss.cnn.com/rss/edition_us.rss"  
+    },
+    
+    
+    "BBC_health":{
+        "health":"http://feeds.bbci.co.uk/news/health/rss.xml"
+    },
+    "Reuters_health":{
+        "health":"http://feeds.reuters.com/reuters/healthNews"
+    },
+    "ABC_health":{
+        "health":"https://abcnews.go.com/abcnews/healthheadlines"
+    },
+    "NewYorkTimes_health":{
+        "health":"http://rss.nytimes.com/services/xml/rss/nyt/Health.xml"
+    },
+    "CNN_health":{
+        "health":"http://rss.cnn.com/rss/edition_us.rss"  
+    },
+    
+    
+    "BBC_style":{
+        "style":"http://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml"
+    },
+    "Reuters_style":{
+        "style":"http://feeds.reuters.com/reuters/lifestyle"
+    },
+    "ABC_style":{
+        "style":"https://abcnews.go.com/abcnews/entertainmentheadlines"
+    },
+    "NewYorkTimes_style":{
+        "style":"http://rss.nytimes.com/services/xml/rss/nyt/FashionandStyle.xml"
+    },
+    "CNN_style":{
+        "style":"http://rss.cnn.com/rss/edition_entertainment.rss"  
+    },
+    
+    
+    "BBC_top":{
+        "top":"http://feeds.bbci.co.uk/news/rss.xml"
+    },
+    "Reuters_top":{
+        "top":"http://feeds.reuters.com/reuters/topNews"
+    },
+    "ABC_top":{
+        "top":"https://abcnews.go.com/abcnews/topstories"
+    },
+    "NewYorkTimes_top":{
+        "top":"http://rss.nytimes.com/services/xml/rss/nyt/MostViewed.xml"
+    },
+    "CNN_top":{
+        "top":"http://rss.cnn.com/rss/edition.rss"  
+    }
+    
+}
