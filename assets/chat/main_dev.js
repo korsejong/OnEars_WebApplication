@@ -275,6 +275,14 @@ $('.btn_mic').click(
                     serverMessage = serverMessageCreater.create(result.data.response.message);
                     serverMessages.push(serverMessage);
                     serverMessage.playAudio();
+                    if(state.depth==0 && serverMessage._documentUrl){
+                        $('.news').attr('src',serverMessage._documentUrl);
+                        $('.news-container').show();
+                    }
+                    else if(state.depy!= 0){
+                        $('.news').attr('src','');
+                        $('.news-container').hide();
+                    }
                 }).catch( (result) => {
                     console.log(result);
                 });
@@ -460,6 +468,14 @@ const requestTestFunction = (message) => {
         serverMessage = serverMessageCreater.create(result.data.response.message);
         serverMessages.push(serverMessage);
         serverMessage.playAudio();
+        if(state.depth==0 && serverMessage._documentUrl){
+            $('.news').attr('src',serverMessage._documentUrl);
+            $('.news-container').show();
+        }
+        else if(state.depy!= 0){
+            $('.news').attr('src','');
+            $('.news-container').hide();
+        }
     }).catch((result)=>{
         console.log(result);
     });

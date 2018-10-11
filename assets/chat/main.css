@@ -4,6 +4,7 @@ html, body {
   height: 100%;
 }
 body {
+  overflow: hidden;
   background:url(../images/mbr-1623x1080.jpg) no-repeat;
   background-size: 100% 100%;
 }
@@ -16,7 +17,8 @@ body {
 }
 .chat_group {
   box-sizing: border-box;
-  position: relative;
+  position: absolute;
+  right: 0;
   width: 40%;
   background: rgb(15,118,153);
   margin: 0 auto;
@@ -26,12 +28,12 @@ body {
   height: -webkit-calc( 100% - 120px );
   height: -moz-calc( 100% - 120px );
   height: calc( 100% - 120px );
-  border-top-left-radius: 25px;
-  border-top-right-radius: 25px;
+  /* border-top-left-radius: 25px;
+  border-top-right-radius: 25px; */
 }
 .top{
-  border-top-left-radius: 25px;
-  border-top-right-radius: 25px;
+  /* border-top-left-radius: 25px;
+  border-top-right-radius: 25px; */
   background: rgb(15,118,153);
   position: fixed;
   top: 0px;
@@ -50,10 +52,12 @@ body {
   background-position: center center;
 }
 .bottom {
-  border-bottom-left-radius: 25px;
-  border-bottom-right-radius: 25px;
+  /* border-bottom-left-radius: 25px;
+  border-bottom-right-radius: 25px; */
   box-sizing: border-box;
-  position: relative;
+  position: absolute;
+  right:0;
+  bottom:0;
   width: 40%;
   background: rgb(15,118,153);
   margin: auto;
@@ -142,15 +146,15 @@ body {
 @media screen and (max-width: 768px)
 {
   .chat_group {
-    border-radius: 0px;
+    /* border-radius: 0px; */
     width: 100%;
   }
   .top{
-    border-radius: 0px;
+    /* border-radius: 0px; */
     width: 100%;
   }
   .bottom {
-    border-radius: 0px;
+    /* border-radius: 0px; */
     width: 100%;
   }
 }
@@ -175,4 +179,18 @@ body {
 }
 .overlay:hover {
   opacity: 1;
+}
+.news-container{
+  display: none;
+  position: absolute;
+  margin: 0;
+  top: 0;
+  left: 0;
+  width: 60%;
+  height: 100%;
+}
+.news{
+  margin: 0;
+  width: 100%;
+  height: 100%;
 }
