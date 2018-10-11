@@ -149,11 +149,24 @@ class SpeechRecognition extends webkitSpeechRecognition {
 }
 
 class PreviousMessageCaller {
-    construct(id){
-        this._id = id;
+    setUserId(userId){
+        this._userId = userId;
     }
-    read(){
-        
+    read(serverMessageCreater,userMessageCreater,serverMessages,userMessages){
+        apigClient.historyPost(null, {"userId" : this._userId})
+        .then((result) => {
+            for(let msg of result.data){
+                if(msg.from_flag){
+                    // user message
+                    // userMessages.push(userMessageCreater.create(msg.data, LANGUAGE));
+                }else{
+                    // server message
+                    serverMessages.push(serverMessageCreater.create(msg));
+                }
+            }
+        }).catch( (result) => {
+            console.log(result);
+        });
     }
     onerror(){
         
@@ -218,7 +231,7 @@ $('.btn_mic').click(
                     serverMessage = serverMessageCreater.create(result.data.response.message);
                     serverMessages.push(serverMessage);
                     serverMessage.playAudio();
-                }).catch( function(result){
+                }).catch( (result) => {
                     console.log(result);
                 });
             }
@@ -258,22 +271,39 @@ $(document).on("click","",
 const connect = (userInfo) => {
     // 사용자 정보 입력 받은 내용 서버로 전송
     // /connect POST 전송
-    apigClient.connectPost(null, {
-        userId: '',
-        age: userInfo.age,
-        gender: userInfo.gender,
-        concern: userInfo.concern
-    })
-    .then((result)=>{
-        // console.log(result);
-        userId = result.data.userId;
-        state = result.data.response.state;
-        serverMessage = serverMessageCreater.create(result.data.response.message);
-        serverMessages.push(serverMessage);
-        serverMessage.playAudio();
-    }).catch( function(result){
-        console.log(result);
-    });
+    if(userId != ''){
+        apigClient.connectPost(null, {
+            userId: userId
+        })
+        .then((result)=>{
+            // console.log(result);
+            userId = result.data.userId;
+            state = result.data.response.state;
+            serverMessage = serverMessageCreater.create(result.data.response.message);
+            serverMessages.push(serverMessage);
+            serverMessage.playAudio();
+        }).catch((result)=>{
+            console.log(result);
+        });
+    }
+    else{
+        apigClient.connectPost(null, {
+            userId: userId,
+            age: userInfo.age,
+            gender: userInfo.gender,
+            concern: userInfo.concern
+        })
+        .then((result)=>{
+            // console.log(result);
+            userId = result.data.userId;
+            state = result.data.response.state;
+            serverMessage = serverMessageCreater.create(result.data.response.message);
+            serverMessages.push(serverMessage);
+            serverMessage.playAudio();
+        }).catch((result)=>{
+            console.log(result);
+        });
+    }
 };
 const createGuideMessage = () => {
     let guide = [
@@ -358,7 +388,7 @@ const requestTestFunction = (message) => {
         serverMessage = serverMessageCreater.create(result.data.response.message);
         serverMessages.push(serverMessage);
         serverMessage.playAudio();
-    }).catch( function(result){
+    }).catch((result)=>{
         console.log(result);
     });
 };
