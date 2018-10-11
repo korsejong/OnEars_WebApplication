@@ -37,6 +37,7 @@ class ServerMessage extends Message {
         this._documentUrl = msg.documentUrl;
         this._documentData = msg.documentData;
         this._audio.addEventListener('ended',createGuideMessage);
+        this._language = 'en';
     }
 	playAudio(){
         this._audio.play();
@@ -46,9 +47,17 @@ class ServerMessage extends Message {
     }
     changeLanguageSet(){
         // 메세지 내용 변경
-        this._data = this._documentData.korSummary;
-        this._audioUrl = this._documentData.korAudioUrl;
-        this._audio = new Audio(this._audioUrl);    
+        if(this._language == 'en'){
+            this._language = 'kr';
+            this._data = this._documentData.korSummary;
+            this._audioUrl = this._documentData.korAudioUrl;
+            this._audio = new Audio(this._audioUrl);  
+        }else{
+            this._language = 'en';
+            this._data = this._documentData.enSummary;
+            this._audioUrl = this._documentData.enAudioUrl;
+            this._audio = new Audio(this._audioUrl);  
+        }
     }
     checkSummary(){
         if(this._documentData.korSummary == null || this._documentData.enSummary == null) return false;
@@ -90,14 +99,28 @@ class ServerMessageCreater extends MessageCreater {
 		super(chatContainerElement);
 	}
 	create(msg){
-		let serverMessage = new ServerMessage(msg);
-        
+        let serverMessage = new ServerMessage(msg);
+        let overlayBtn;
+        if(msg.documentData.korSummary == null){
+            overlayBtn = `<div class="overlay">
+                <button class="btn btn-danger btn-play">Play</button>
+                <button class="btn btn-danger btn-stop">Stop</button>
+            </div>`
+        }else{
+            overlayBtn = `<div class="overlay">
+                <button class="btn btn-danger btn-play">Play</button>
+                <button class="btn btn-danger btn-stop">Stop</button>
+                <button class="btn btn-danger btn-trans">Translate</button>
+            </div>`
+        }
         // view create
 		$(this._chatContainerElement).append(`<div class="chat_bx server">
         <div class="img_bx">
         <img src="assets/images/radio-122x128.png" width="42" height="42" alt="">
         </div>
-		<div class="txt">${serverMessage.getData()}<span class="time">${serverMessage.getDate().str} ${serverMessage.getDate().hours}:${serverMessage.getDate().minutes}</span></div>
+        <div class="txt">
+        ${overlayBtn}
+        ${serverMessage.getData()}<span class="time">${serverMessage.getDate().str} ${serverMessage.getDate().hours}:${serverMessage.getDate().minutes}</span></div>
 		</div>`);
 		$(this._chatContainerElement).scrollTop(this._chatContainerElement.scrollHeight);
 
@@ -116,7 +139,8 @@ class GuideMessageCreater extends MessageCreater {
         <div class="img_bx">
         <img src="assets/images/radio-122x128.png" width="42" height="42" alt="">
         </div>
-		<div class="txt">${guideMessage.getData()}<span class="time">${guideMessage.getDate().str} ${guideMessage.getDate().hours}:${guideMessage.getDate().minutes}</span></div>
+        <div class="txt">
+        ${guideMessage.getData()}<span class="time">${guideMessage.getDate().str} ${guideMessage.getDate().hours}:${guideMessage.getDate().minutes}</span></div>
 		</div>`);
 		$(this._chatContainerElement).scrollTop(this._chatContainerElement.scrollHeight);
         
@@ -202,7 +226,27 @@ let serverMessage = null;
 $(document).ready( () => {
     console.log('READY');
     $('.chat_group').niceScroll();
+    $('#user_info_modal').modal({backdrop: 'static'});
+    $('#user_info_modal').modal();  
 });
+
+$('.form-submit').click(
+    () => {
+        if($('.user-info')[0].checkValidity()) {
+            let userInfoArray = $('.user-info').serializeArray();
+            let userInfo = {
+                "age": userInfoArray[1].value,
+                "gender": userInfoArray[2].value,
+                "concern": userInfoArray[3].value
+            };
+            connect(userInfo);
+            serverMessages.push(guideMessageCreater.create({data:`환영합니다 ${userInfoArray[0].value}님! 잠시만 기다려주시면 메세지를 전달해 드릴께요 :)`}));
+            $('#user_info_modal').modal('toggle');
+        } else {
+            alert("입력한 값을 확인해 주세요.");
+        }
+    }
+)
 
 $('.btn_mic').click(
     () => {
@@ -244,25 +288,53 @@ $('.btn_mic').click(
         }
     }
 );
-
 // Play
-$(document).on("click","",
-    () => {
-
+$(document).on("click",".btn-play",
+    function(){
+        let chatbox = $(this).parent().parent().parent()[0];
+        let index = $(".chat_bx").filter(".server").index(chatbox);
+        
+        //server message
+        serverMessage = serverMessages[index];
+        serverMessage.playAudio();
     }
 );
 
 // Stop
-$(document).on("click","",
-    () => {
-
+$(document).on("click",".btn-stop",
+    function(){
+        let chatbox = $(this).parent().parent().parent()[0];
+        let index = $(".chat_bx").filter(".server").index(chatbox);
+        
+        //server message
+        serverMessage = serverMessages[index];
+        serverMessage.stopAudio();
     }
 );
 
 // Translate
-$(document).on("click","",
-    () => {
-
+$(document).on("click",".btn-trans",
+    function(){
+        let chatbox = $(this).parent().parent().parent()[0];
+        let index = $(".chat_bx").filter(".server").index(chatbox);
+        
+        //server message
+        serverMessage = serverMessages[index];
+        if(serverMessage.checkSummary()){
+            serverMessage.changeLanguageSet();
+            $(chatbox).html(`
+            <div class="img_bx">
+            <img src="assets/images/radio-122x128.png" width="42" height="42" alt="">
+            </div>
+            <div class="txt">
+            <div class="overlay">
+                <button class="btn btn-danger btn-play">Play</button>
+                <button class="btn btn-danger btn-stop">Stop</button>
+                <button class="btn btn-danger btn-trans">Translate</button>
+            </div>
+            ${serverMessage.getData()}<span class="time">${serverMessage.getDate().str} ${serverMessage.getDate().hours}:${serverMessage.getDate().minutes}</span></div>
+            `);
+        }
     }
 );
 
@@ -325,27 +397,27 @@ const createGuideMessage = () => {
     }
 };
 
-// TEST FUNCTION
-$(document).on("click",".chat_bx",function(){
-    let index = $(".chat_bx").filter(".server").index(this);
-    let index2 = $(".chat_bx").filter(".me").index(this);
-    // console.log(index);
-    // console.log(index2);
-    if(index2 == -1){
-        //server message
-        serverMessage = serverMessages[index];
-        console.log(serverMessage);
-        if(serverMessage.checkSummary()){
-            serverMessage.changeLanguageSet();
-            $(this).html(`
-            <div class="img_bx">
-            <img src="assets/images/radio-122x128.png" width="42" height="42" alt="">
-            </div>
-            <div class="txt">${serverMessage.getData()}<span class="time">${serverMessage.getDate().str} ${serverMessage.getDate().hours}:${serverMessage.getDate().minutes}</span></div>
-            `);
-        }
-    }
+// overlay functions
+const sizeTheOverlays = () => {
+    $(".overlay").resize().each(function() {
+    var h = $(this).parent().outerHeight();
+    var w = $(this).parent().outerWidth();
+    $(this).css("height", h);
+    $(this).css("width", w);
+  });
+};
+
+sizeTheOverlays();
+
+let width = $(window).width();
+$(window).resize(function(){
+   if($(this).width() != width){
+      width = $(this).width();
+      sizeTheOverlays();
+   }
 });
+
+// TEST FUNCTION
 const selectMessageTestFunction = (type,idx) => {
     if(type == "server"){
         console.log(serverMessages[idx]);
