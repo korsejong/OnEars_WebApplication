@@ -86,7 +86,7 @@ apigClientFactory.newClient = function (config) {
     apigClient.chatbotPost = function (params, body, additionalParams) {
         if(additionalParams === undefined) { additionalParams = {}; }
         
-        apiGateway.core.utils.assertParametersDefined(params, [], ['body']);
+        apiGateway.core.utils.assertParametersDefined(params, ['body'], ['body']);
         
         var chatbotPostRequest = {
             verb: 'post'.toUpperCase(),
@@ -104,7 +104,7 @@ apigClientFactory.newClient = function (config) {
     apigClient.chatbotDelete = function (params, body, additionalParams) {
         if(additionalParams === undefined) { additionalParams = {}; }
         
-        apiGateway.core.utils.assertParametersDefined(params, [], ['body']);
+        apiGateway.core.utils.assertParametersDefined(params, ['body'], ['body']);
         
         var chatbotDeleteRequest = {
             verb: 'delete'.toUpperCase(),
@@ -140,7 +140,7 @@ apigClientFactory.newClient = function (config) {
     apigClient.connectPost = function (params, body, additionalParams) {
         if(additionalParams === undefined) { additionalParams = {}; }
         
-        apiGateway.core.utils.assertParametersDefined(params, [], ['body']);
+        apiGateway.core.utils.assertParametersDefined(params, ['body'], ['body']);
         
         var connectPostRequest = {
             verb: 'post'.toUpperCase(),
@@ -176,7 +176,7 @@ apigClientFactory.newClient = function (config) {
     apigClient.historyPost = function (params, body, additionalParams) {
         if(additionalParams === undefined) { additionalParams = {}; }
         
-        apiGateway.core.utils.assertParametersDefined(params, [], ['body']);
+        apiGateway.core.utils.assertParametersDefined(params, ['body'], ['body']);
         
         var historyPostRequest = {
             verb: 'post'.toUpperCase(),
