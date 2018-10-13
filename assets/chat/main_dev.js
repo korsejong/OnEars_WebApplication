@@ -207,7 +207,8 @@ const userMessageCreater = new UserMessageCreater(chatContainerElement);
 const serverMessageCreater = new ServerMessageCreater(chatContainerElement);
 const guideMessageCreater = new GuideMessageCreater(chatContainerElement);
 
-let userId = ''
+let userId = '';
+let userName = '';
 let state = {
     depth: 0,
     mainCategory: 'news',
@@ -226,21 +227,20 @@ let serverMessage = null;
 $(document).ready( () => {
     console.log('READY');
     $('.chat_group').niceScroll();
-    $('#user_info_modal').modal({backdrop: 'static'});
-    $('#user_info_modal').modal();  
 });
 
 $('.form-submit').click(
     () => {
         if($('.user-info')[0].checkValidity()) {
             let userInfoArray = $('.user-info').serializeArray();
+            userName = userInfoArray[0].value;
             let userInfo = {
                 "age": userInfoArray[1].value,
                 "gender": userInfoArray[2].value,
                 "concern": userInfoArray[3].value
             };
             connect(userInfo);
-            serverMessages.push(guideMessageCreater.create({data:`환영합니다 ${userInfoArray[0].value}님! 잠시만 기다려주시면 메세지를 전달해 드릴께요 :)`}));
+            serverMessages.push(guideMessageCreater.create({data:`환영합니다 ${userName}님! 잠시만 기다려주시면 메세지를 전달해 드릴께요 :)`}));
             $('#user_info_modal').modal('toggle');
         } else {
             alert("입력한 값을 확인해 주세요.");
@@ -377,6 +377,8 @@ const connect = (userInfo) => {
             // console.log(result);
             userId = result.data.userId;
             state = result.data.response.state;
+            // add indexedDB
+            add({userId:userId,userName:userName});
             serverMessage = serverMessageCreater.create(result.data.response.message);
             serverMessages.push(serverMessage);
             serverMessage.playAudio();
