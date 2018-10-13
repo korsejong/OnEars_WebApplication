@@ -103,20 +103,20 @@ class ServerMessageCreater extends MessageCreater {
         let overlayBtn;
         if(msg.documentData.korSummary == null){
             overlayBtn = `<div class="overlay">
-                <button class="btn btn-danger btn-play">Play</button>
-                <button class="btn btn-danger btn-stop">Stop</button>
+                <button class="btn btn-secondary btn-play">Play</button>
+                <button class="btn btn-secondary btn-stop">Stop</button>
             </div>`
         }else{
             overlayBtn = `<div class="overlay">
-                <button class="btn btn-danger btn-play">Play</button>
-                <button class="btn btn-danger btn-stop">Stop</button>
-                <button class="btn btn-danger btn-trans">Translate</button>
+                <button class="btn btn-secondary btn-play">Play</button>
+                <button class="btn btn-secondary btn-stop">Stop</button>
+                <button class="btn btn-secondary btn-trans">Translate</button>
             </div>`
         }
         // view create
 		$(this._chatContainerElement).append(`<div class="chat_bx server">
         <div class="img_bx">
-        <img src="assets/images/radio-122x128.png" width="42" height="42" alt="">
+        <img src="assets/images/onears.png" width="42" height="42" alt="">
         </div>
         <div class="txt">
         ${overlayBtn}
@@ -137,7 +137,7 @@ class GuideMessageCreater extends MessageCreater {
         // view create
 		$(this._chatContainerElement).append(`<div class="chat_bx server">
         <div class="img_bx">
-        <img src="assets/images/radio-122x128.png" width="42" height="42" alt="">
+        <img src="assets/images/onears.png" width="42" height="42" alt="">
         </div>
         <div class="txt">
         ${guideMessage.getData()}<span class="time">${guideMessage.getDate().str} ${guideMessage.getDate().hours}:${guideMessage.getDate().minutes}</span></div>
@@ -223,79 +223,10 @@ let userMessage = null;
 let serverMessage = null;
 
 // Event
-
 $(document).ready( () => {
-    console.log('READY');
     $('.chat_group').niceScroll();
 });
 
-$('.form-submit').click(
-    () => {
-        if($('.user-info')[0].checkValidity()) {
-            let userInfoArray = $('.user-info').serializeArray();
-            userName = userInfoArray[0].value;
-            let userInfo = {
-                "age": userInfoArray[1].value,
-                "gender": userInfoArray[2].value,
-                "concern": userInfoArray[3].value
-            };
-            connect(userInfo);
-            serverMessages.push(guideMessageCreater.create({data:`환영합니다 ${userName}님! 잠시만 기다려주시면 메세지를 전달해 드릴께요 :)`}));
-            $('#user_info_modal').modal('toggle');
-        } else {
-            alert("입력한 값을 확인해 주세요.");
-        }
-    }
-)
-
-$('.btn_mic').click(
-    () => {
-        // 사용자 음성 입력
-        if (window.hasOwnProperty('webkitSpeechRecognition')) {
-            let speechRecognition = new SpeechRecognition(LANGUAGE);
-            speechRecognition.start();
-            speechRecognition.onresult = (e) => {
-                speechRecognition.stop();
-                userMessage = userMessageCreater.create(e.results[0][0].transcript, LANGUAGE);
-                userMessages.push(userMessage);
-                let request = {
-                    userId: userId,
-                    state: state,
-                    message: {
-                        data: userMessage.getData()
-                    }
-                }
-                // console.log(request);
-
-                // /chatbot POST 전송
-                apigClient.chatbotPost(null, request)
-                .then((result) => {
-                    console.log(result);
-                    state = result.data.response.state;
-                    serverMessage = serverMessageCreater.create(result.data.response.message);
-                    serverMessages.push(serverMessage);
-                    serverMessage.playAudio();
-                    if(state.depth==0 && serverMessage._documentUrl){
-                        $('.news').attr('src',serverMessage._documentUrl);
-                        $('.news-container').show();
-                    }
-                    else if(state.depy!= 0){
-                        $('.news').attr('src','');
-                        $('.news-container').hide();
-                    }
-                }).catch( (result) => {
-                    console.log(result);
-                });
-            }
-            speechRecognition.onerror = (e) => {
-                speechRecognition.stop();
-                console.log("err");
-            }
-        }else{
-            alert("지원하지않는 브라우저입니다.");
-        }
-    }
-);
 // Play
 $(document).on("click",".btn-play",
     function(){
@@ -332,13 +263,13 @@ $(document).on("click",".btn-trans",
             serverMessage.changeLanguageSet();
             $(chatbox).html(`
             <div class="img_bx">
-            <img src="assets/images/radio-122x128.png" width="42" height="42" alt="">
+            <img src="assets/images/onears.png" width="42" height="42" alt="">
             </div>
             <div class="txt">
             <div class="overlay">
-                <button class="btn btn-danger btn-play">Play</button>
-                <button class="btn btn-danger btn-stop">Stop</button>
-                <button class="btn btn-danger btn-trans">Translate</button>
+                <button class="btn btn-secondary btn-play">Play</button>
+                <button class="btn btn-secondary btn-stop">Stop</button>
+                <button class="btn btn-secondary btn-trans">Translate</button>
             </div>
             ${serverMessage.getData()}<span class="time">${serverMessage.getDate().str} ${serverMessage.getDate().hours}:${serverMessage.getDate().minutes}</span></div>
             `);
@@ -348,6 +279,68 @@ $(document).on("click",".btn-trans",
 
 
 // Function
+const submitForm = () => {
+    if($('.user-info')[0].checkValidity()) {
+        let userInfoArray = $('.user-info').serializeArray();
+        userName = userInfoArray[0].value;
+        let userInfo = {
+            "age": userInfoArray[1].value,
+            "gender": userInfoArray[2].value,
+            "concern": userInfoArray[3].value
+        };
+        connect(userInfo);
+        serverMessages.push(guideMessageCreater.create({data:`환영합니다 ${userName}님! 잠시만 기다려주시면 메세지를 전달해 드릴께요 :)`}));
+        $('#user_info_modal').modal('toggle');
+    } else {
+        alert("입력한 값을 확인해 주세요.");
+    }
+}
+const recognizeSpeech = () => {
+    // 사용자 음성 입력
+    if (window.hasOwnProperty('webkitSpeechRecognition')) {
+        let speechRecognition = new SpeechRecognition(LANGUAGE);
+        speechRecognition.start();
+        speechRecognition.onresult = (e) => {
+            speechRecognition.stop();
+            userMessage = userMessageCreater.create(e.results[0][0].transcript, LANGUAGE);
+            userMessages.push(userMessage);
+            let request = {
+                userId: userId,
+                state: state,
+                message: {
+                    data: userMessage.getData()
+                }
+            }
+            // console.log(request);
+
+            // /chatbot POST 전송
+            apigClient.chatbotPost(null, request)
+            .then((result) => {
+                console.log(result);
+                state = result.data.response.state;
+                serverMessage = serverMessageCreater.create(result.data.response.message);
+                serverMessages.push(serverMessage);
+                serverMessage.playAudio();
+                if(state.depth==0 && serverMessage._documentUrl){
+                    $('.news').attr('src',serverMessage._documentUrl);
+                    $('.news-container').show();
+                }
+                else if(state.depy!= 0){
+                    $('.news').attr('src','');
+                    $('.news-container').hide();
+                }
+            }).catch( (result) => {
+                console.log(result);
+            });
+        }
+        speechRecognition.onerror = (e) => {
+            speechRecognition.stop();
+            console.log("err");
+        }
+    }else{
+        alert("지원하지않는 브라우저입니다.");
+    }
+}
 const connect = (userInfo) => {
     // 사용자 정보 입력 받은 내용 서버로 전송
     // /connect POST 전송

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko">
     <head>
-        <meta charset="utf-8">
-        <link rel="shortcut icon" href="assets/images/radio-122x128.png" type="image/x-icon">
+        <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+        <link rel="shortcut icon" href="assets/images/onears.png" type="image/x-icon">
         <title>OnEars</title>
         <link rel="stylesheet" href="assets/chat/main.css">
         <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
@@ -55,7 +55,7 @@
             
                 <!-- Modal footer -->
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary form-submit">Submit</button>
+                    <button type="button" class="btn btn-primary form-submit" onclick="submitForm()">Submit</button>
                 </div>
             
                 </div>
@@ -71,7 +71,7 @@
             </div>
         </div>
         <div class="bottom">
-            <a href="#none" role="button" class="btn_mic"></a>    
+            <a href="javascript:void(0);" role="button" class="btn_mic" onclick="recognizeSpeech()"></a>    
         </div>
         <script type="text/javascript" src="assets/web/assets/jquery/jquery.min.js"></script>
         <script type="text/javascript" src="assets/chat/jquery.nicescroll.min.js"></script>
