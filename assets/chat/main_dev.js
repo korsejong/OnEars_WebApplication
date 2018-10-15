@@ -177,13 +177,14 @@ class PreviousMessageCaller {
     read(serverMessageCreater,userMessageCreater,serverMessages,userMessages){
         apigClient.historyPost(null, {"userId" : this._userId})
         .then((result) => {
+            console.log(result);
             for(let msg of result.data){
                 if(msg.from_flag){
                     // user message
                     // userMessages.push(userMessageCreater.create(msg.data, LANGUAGE));
                 }else{
                     // server message
-                    serverMessages.push(serverMessageCreater.create(msg));
+                    // serverMessages.push(serverMessageCreater.create(msg));
                 }
             }
         }).catch( (result) => {
@@ -306,6 +307,7 @@ const recognizeSpeech = () => {
         speechRecognition.start();
         speechRecognition.onresult = (e) => {
             speechRecognition.stop();
+            
             userMessage = userMessageCreater.create(e.results[0][0].transcript, LANGUAGE);
             userMessages.push(userMessage);
             let request = {
@@ -316,10 +318,11 @@ const recognizeSpeech = () => {
                 }
             }
             // console.log(request);
-
+            toggleWaitingMessageBox();
             // /chatbot POST 전송
             apigClient.chatbotPost(null, request)
             .then((result) => {
+                toggleWaitingMessageBox();
                 console.log(result);
                 state = result.data.response.state;
                 serverMessage = serverMessageCreater.create(result.data.response.message);
@@ -349,10 +352,12 @@ const connect = (userInfo) => {
     // 사용자 정보 입력 받은 내용 서버로 전송
     // /connect POST 전송
     if(userId != ''){
+        toggleWaitingMessageBox();
         apigClient.connectPost(null, {
             userId: userId
         })
         .then((result)=>{
+            toggleWaitingMessageBox();
             // console.log(result);
             userId = result.data.userId;
             state = result.data.response.state;
@@ -364,6 +369,7 @@ const connect = (userInfo) => {
         });
     }
     else{
+        toggleWaitingMessageBox();
         apigClient.connectPost(null, {
             userId: userId,
             age: userInfo.age,
@@ -371,6 +377,7 @@ const connect = (userInfo) => {
             concern: userInfo.concern
         })
         .then((result)=>{
+            toggleWaitingMessageBox();
             // console.log(result);
             userId = result.data.userId;
             state = result.data.response.state;
@@ -426,6 +433,22 @@ $(window).resize(function(){
    }
 });
 
+const toggleWaitingMessageBox = () => {
+    if($('.waiting-msg')[0] == undefined){
+        $(chatContainerElement).append(`
+        <div class='chat_bx server waiting-msg'>
+        <div class='img_bx'>
+            <img src='assets/images/onears.png' width="42px" height="42px" alt>
+        </div>
+        <div class='txt'>
+            <div class="lds-ellipsis" id="loading"><div></div><div></div><div></div><div></div></div>
+        </div>
+        </div>`)
+    }else{
+        $('.waiting-msg').remove();
+    }
+}
+
 // indexedDB functions
 // indexedDB open async onerror, onsuccess
 indexdDB.onerror = (event) => {
@@ -476,8 +499,8 @@ const readAll = () => {
             }else{
                 userId = request.result[0].userId;
                 userName = request.result[0].userName;
-                connect();
                 serverMessages.push(guideMessageCreater.create({data:`환영합니다 ${userName}님! 잠시만 기다려주시면 메세지를 전달해 드릴께요 :)`}));
+                connect();
             }
         }
     }catch(e){

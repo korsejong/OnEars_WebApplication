@@ -118,7 +118,7 @@ body {
 }
 .chat_bx.me .txt {
   /* background-color: rgb(240, 68, 68); */
-  background-color: #343a40;
+  background-color: #aaa;
 }
 .chat_bx.me .txt:before {
   left: initial;
@@ -127,9 +127,9 @@ body {
   border-right: 6px solid transparent;
   border-left: 6px solid rgb(240, 68, 68);
   border-bottom: 6px solid transparent; */
-  border-top: 6px solid #343a40;
+  border-top: 6px solid #aaa;
   border-right: 6px solid transparent;
-  border-left: 6px solid #343a40;
+  border-left: 6px solid #aaa;
   border-bottom: 6px solid transparent;
 }
 .chat_bx.me .time {
@@ -146,6 +146,23 @@ body {
   width: 80px;
   height: 80px;
   background: url(../images/mic.png) no-repeat;
+  background-size: 100% 100%;
+}
+.btn_mic:hover {
+  -webkit-transition: all 500ms ease;
+  -moz-transition: all 500ms ease;
+  -ms-transition: all 500ms ease;
+  -o-transition: all 500ms ease;
+  transition: all 500ms ease;
+  position: absolute;
+  left: 50%;
+  margin-left: -40px;
+  bottom: 20px;
+  color: transparent;
+  overflow: hidden;
+  width: 80px;
+  height: 80px;
+  background: url(../images/mic_hover.png) no-repeat;
   background-size: 100% 100%;
 }
 .chat-box{
@@ -208,3 +225,70 @@ body {
 .btn-overlay{
   color: #3f0561;
 }
+
+
+
+
+.lds-ellipsis {
+  display: inline-block;
+  position: relative;
+  width: 60px;
+  height: 16px;
+}
+.lds-ellipsis div {
+  position: absolute;
+  top: 7px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #bbb;
+  animation-timing-function: cubic-bezier(0, 1, 1, 0);
+}
+.lds-ellipsis div:nth-child(1) {
+  left: 6px;
+  animation: lds-ellipsis1 0.6s infinite;
+}
+.lds-ellipsis div:nth-child(2) {
+  left: 6px;
+  animation: lds-ellipsis2 0.6s infinite;
+}
+.lds-ellipsis div:nth-child(3) {
+  left: 26px;
+  animation: lds-ellipsis2 0.6s infinite;
+}
+.lds-ellipsis div:nth-child(4) {
+  left: 45px;
+  animation: lds-ellipsis3 0.6s infinite;
+}
+@keyframes lds-ellipsis1 {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes lds-ellipsis3 {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0);
+  }
+}
+@keyframes lds-ellipsis2 {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(19px, 0);
+  }
+}
+
+#previous_message {
+    /*display: none;*/
+    width: 50%;
+    margin: 0 auto;
+    text-align: center;
+}
+
