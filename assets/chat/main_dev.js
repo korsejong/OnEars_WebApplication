@@ -82,7 +82,6 @@ class GuideMessage extends Message {
 }
 class UserMessage extends Message {
 }
-
 class MessageCreater {
 	constructor(chatContainerElement){
 		this._chatContainerElement = chatContainerElement;
@@ -177,14 +176,9 @@ class PreviousMessageCaller {
     read(serverMessageCreater,userMessageCreater,serverMessages,userMessages){
         apigClient.historyPost(null, {"userId" : this._userId})
         .then((result) => {
-            console.log(result);
             for(let msg of result.data){
                 if(msg.from_flag){
-                    // user message
-                    // userMessages.push(userMessageCreater.create(msg.data, LANGUAGE));
                 }else{
-                    // server message
-                    // serverMessages.push(serverMessageCreater.create(msg));
                 }
             }
         }).catch( (result) => {
@@ -198,12 +192,12 @@ class PreviousMessageCaller {
 window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
 window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
 window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
+// 브라우저 indexedDB 지원 체크
 if (!window.indexedDB) {
-    // 브라우저 indexedDB 지원 체크
     window.alert("Your browser doesn't support a stable version of IndexedDB.")
 }
 const dbName = "user";
-const indexdDB = window.indexedDB.open(dbName, 1);
+const indexedDB = window.indexedDB.open(dbName, 1);
 const API_KEY = "https://lu8da3cuo2.execute-api.ap-northeast-2.amazonaws.com/version1";
 const apigClient = apigClientFactory.newClient({apikey: API_KEY});
 const LANGUAGE = "ko-KR";
@@ -226,45 +220,55 @@ let userMessages = [];
 let serverMessages = [];
 let userMessage = null;
 let serverMessage = null;
+let width = $(window).width();
 
-// Event
+// Overlay functions
+const sizeTheOverlays = () => {
+    $(".overlay").resize().each(function() {
+    var h = $(this).parent().outerHeight();
+    var w = $(this).parent().outerWidth();
+    $(this).css("height", h);
+    $(this).css("width", w);
+  });
+};
+sizeTheOverlays();
+$(window).resize(function(){
+   if($(this).width() != width){
+      width = $(this).width();
+      sizeTheOverlays();
+   }
+});
 $(document).ready( () => {
     $('.chat_group').niceScroll();
 });
 
-// Play
+// Events
+// On click chat audio play button
 $(document).on("click",".btn-play",
     function(){
         let chatbox = $(this).parent().parent().parent()[0];
         let index = $(".chat_bx").filter(".server").index(chatbox);
-        
-        //server message
         serverMessage = serverMessages[index];
         serverMessage.playAudio();
     }
 );
-
-// Stop
+// On click chat audio stop button
 $(document).on("click",".btn-stop",
     function(){
         let chatbox = $(this).parent().parent().parent()[0];
         let index = $(".chat_bx").filter(".server").index(chatbox);
-        
-        //server message
         serverMessage = serverMessages[index];
         serverMessage.stopAudio();
     }
 );
-
-// Translate
+// On click chat translate button
 $(document).on("click",".btn-trans",
     function(){
         let chatbox = $(this).parent().parent().parent()[0];
         let index = $(".chat_bx").filter(".server").index(chatbox);
-        
-        //server message
         serverMessage = serverMessages[index];
         if(serverMessage.checkSummary()){
+            serverMessage.stopAudio();
             serverMessage.changeLanguageSet();
             $(chatbox).html(`
             <div class="img_bx">
@@ -276,14 +280,17 @@ $(document).on("click",".btn-trans",
                 <button class="btn btn-secondary btn-stop">Stop</button>
                 <button class="btn btn-secondary btn-trans">Translate</button>
             </div>
-            ${serverMessage.getData()}<span class="time">${serverMessage.getDate().str} ${serverMessage.getDate().hours}:${serverMessage.getDate().minutes}</span></div>
+            ${serverMessage.getData()}
+            <span class="time">
+            ${serverMessage.getDate().str} ${serverMessage.getDate().hours}:${serverMessage.getDate().minutes}
+            </span></div>
             `);
         }
     }
 );
 
-
-// Function
+// Functions
+// Submit user information
 const submitForm = () => {
     if($('.user-info')[0].checkValidity()) {
         let userInfoArray = $('.user-info').serializeArray();
@@ -293,13 +300,14 @@ const submitForm = () => {
             "gender": userInfoArray[2].value,
             "concern": userInfoArray[3].value
         };
-        connect(userInfo);
         serverMessages.push(guideMessageCreater.create({data:`환영합니다 ${userName}님! 잠시만 기다려주시면 메세지를 전달해 드릴께요 :)`}));
+        connect(userInfo);
         $('#user_info_modal').modal('toggle');
     } else {
         alert("입력한 값을 확인해 주세요.");
     }
-}
+};
+// Recognize user speech
 const recognizeSpeech = () => {
     // 사용자 음성 입력
     if (window.hasOwnProperty('webkitSpeechRecognition')) {
@@ -307,7 +315,6 @@ const recognizeSpeech = () => {
         speechRecognition.start();
         speechRecognition.onresult = (e) => {
             speechRecognition.stop();
-            
             userMessage = userMessageCreater.create(e.results[0][0].transcript, LANGUAGE);
             userMessages.push(userMessage);
             let request = {
@@ -316,23 +323,20 @@ const recognizeSpeech = () => {
                 message: {
                     data: userMessage.getData()
                 }
-            }
-            // console.log(request);
+            };
             toggleWaitingMessageBox();
-            // /chatbot POST 전송
             apigClient.chatbotPost(null, request)
             .then((result) => {
                 toggleWaitingMessageBox();
-                console.log(result);
                 state = result.data.response.state;
                 serverMessage = serverMessageCreater.create(result.data.response.message);
                 serverMessages.push(serverMessage);
                 serverMessage.playAudio();
-                if(state.depth==0 && serverMessage._documentUrl){
+                if(state.depth == 0 && serverMessage._documentUrl){
                     $('.news').attr('src',serverMessage._documentUrl);
                     $('.news-container').show();
                 }
-                else if(state.depy!= 0){
+                else if(state.depth != 0){
                     $('.news').attr('src','');
                     $('.news-container').hide();
                 }
@@ -342,23 +346,21 @@ const recognizeSpeech = () => {
         }
         speechRecognition.onerror = (e) => {
             speechRecognition.stop();
-            console.log("err");
-        }
+            console.log(e);
+        };
     }else{
         alert("지원하지않는 브라우저입니다.");
     }
-}
+};
+// Connect server
 const connect = (userInfo) => {
-    // 사용자 정보 입력 받은 내용 서버로 전송
-    // /connect POST 전송
+    toggleWaitingMessageBox();
     if(userId != ''){
-        toggleWaitingMessageBox();
         apigClient.connectPost(null, {
             userId: userId
         })
         .then((result)=>{
             toggleWaitingMessageBox();
-            // console.log(result);
             userId = result.data.userId;
             state = result.data.response.state;
             serverMessage = serverMessageCreater.create(result.data.response.message);
@@ -369,7 +371,6 @@ const connect = (userInfo) => {
         });
     }
     else{
-        toggleWaitingMessageBox();
         apigClient.connectPost(null, {
             userId: userId,
             age: userInfo.age,
@@ -378,10 +379,8 @@ const connect = (userInfo) => {
         })
         .then((result)=>{
             toggleWaitingMessageBox();
-            // console.log(result);
             userId = result.data.userId;
             state = result.data.response.state;
-            // add indexedDB
             add({userId:userId,userName:userName});
             serverMessage = serverMessageCreater.create(result.data.response.message);
             serverMessages.push(serverMessage);
@@ -413,26 +412,7 @@ const createGuideMessage = () => {
 const openModal = () => {
     $('#user_info_modal').modal({backdrop: 'static'});
     $('#user_info_modal').modal();
-}
-
-// overlay functions
-const sizeTheOverlays = () => {
-    $(".overlay").resize().each(function() {
-    var h = $(this).parent().outerHeight();
-    var w = $(this).parent().outerWidth();
-    $(this).css("height", h);
-    $(this).css("width", w);
-  });
 };
-sizeTheOverlays();
-let width = $(window).width();
-$(window).resize(function(){
-   if($(this).width() != width){
-      width = $(this).width();
-      sizeTheOverlays();
-   }
-});
-
 const toggleWaitingMessageBox = () => {
     if($('.waiting-msg')[0] == undefined){
         $(chatContainerElement).append(`
@@ -447,22 +427,22 @@ const toggleWaitingMessageBox = () => {
     }else{
         $('.waiting-msg').remove();
     }
-}
-
-// indexedDB functions
-// indexedDB open async onerror, onsuccess
-indexdDB.onerror = (event) => {
-    console.log("indexedDB open error");
 };
-indexdDB.onsuccess = (event) => {
+// indexedDB functions
+indexedDB.onerror = (event) => {
+    console.log("log: indexedDB onerror");
+    console.log(event);
+    alert("재접속 해주시길 바랍니다.");
+};
+indexedDB.onsuccess = (event) => {
     try{
-        db = indexdDB.result;
+        db = indexedDB.result;
         readAll();
     }catch(e){
         console.log(e);
     }
 };
-indexdDB.onupgradeneeded = (event) => {
+indexedDB.onupgradeneeded = (event) => {
     try{
         db = event.target.result;
         db.createObjectStore(dbName, { keyPath: "userId"} );
@@ -476,6 +456,8 @@ const read = (id) => {
         let request = objectStore.get(id);
         request.onerror = (event) => {
             console.log("log: read() onerror");
+            console.log(event);
+            alert("재접속 해주시길 바랍니다.");
         };
         request.onsuccess = (event) => {
             console.log(request.result);
@@ -484,13 +466,15 @@ const read = (id) => {
     catch(e){
         console.log(e);
     }
-}
+};
 const readAll = () => {
     try{
         let objectStore = db.transaction(dbName).objectStore(dbName);
         let request = objectStore.getAll();
         request.onerror = (event) => {
             console.log("log: readAll() onerror");
+            console.log(event);
+            alert("재접속 해주시길 바랍니다.");
         };
         request.onsuccess = (event) => {
             console.log("log: readAll() onsuccess");
@@ -506,87 +490,35 @@ const readAll = () => {
     }catch(e){
         console.log(e);
     }
-}
+};
 const add = (user) => {
     try{
         let request = db.transaction([dbName], "readwrite").objectStore(dbName).add(user);
         request.onsuccess = (event) => {
             console.log("log: add() onsuccess");
+            console.log(event);
         };
         request.onerror = (event) => {
             console.log("log: add() onerror");
+            console.log(event);
         }
     }catch(e){
         console.log(e);
     }
-}
+};
 const remove = (userId) => {
     try{
         let request = db.transaction([dbName], "readwrite").objectStore(dbName).delete(userId);
         request.onsuccess = (event) => {
             console.log("log: remove() onsuccess");
+            console.log(event);
         };
         request.onerror = (event) => {
             console.log("err: remove() onerror");
+            console.log(event);
         }
     }
     catch(e){
         console.log(e);
     }
-}
-
-// TEST FUNCTION
-const selectMessageTestFunction = (type,idx) => {
-    if(type == "server"){
-        console.log(serverMessages[idx]);
-    }else if(type == "user"){
-        console.log(userMessages[idx]);
-    }
-};
-const sttTestFuncton = () => {
-    if (window.hasOwnProperty('webkitSpeechRecognition')) {
-        let speechRecognition = new SpeechRecognition(LANGUAGE);
-        speechRecognition.start();
-        speechRecognition.onresult = async function(e){
-            speechRecognition.stop();
-            // console.log(e.results[0][0].transcript);
-        }
-        speechRecognition.onerror = function(e) {
-            speechRecognition.stop();
-            // console.log("err");
-        }
-    }else{
-        alert("지원하지않는 브라우저입니다.");
-    }
-};
-const requestTestFunction = (message) => {
-    console.log('TEST FUNCTION CALL')
-    userMessage = userMessageCreater.create(message, LANGUAGE);
-    userMessages.push(userMessage);
-    let request = {
-        userId: userId,
-        state: state,
-        message: {
-            data: message
-        }
-    }
-    console.log(request);
-    apigClient.chatbotPost(null, request)
-    .then((result)=>{
-        console.log(result);
-        state = result.data.response.state;
-        serverMessage = serverMessageCreater.create(result.data.response.message);
-        serverMessages.push(serverMessage);
-        serverMessage.playAudio();
-        if(state.depth==0 && serverMessage._documentUrl){
-            $('.news').attr('src',serverMessage._documentUrl);
-            $('.news-container').show();
-        }
-        else if(state.depy!= 0){
-            $('.news').attr('src','');
-            $('.news-container').hide();
-        }
-    }).catch((result)=>{
-        console.log(result);
-    });
 };
